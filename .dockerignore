@@ -1,0 +1,49 @@
+# Misc
+.git
+.env
+
+# Documentation
+documentation/
+.md
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+
+# Vite
+node_modules/
+*.log
+
+# Vue
+*.cache
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDEs
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Mac OS
+.DS_Store
+
+# VS Code
+.vscode/
