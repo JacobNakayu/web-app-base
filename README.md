@@ -1,9 +1,9 @@
 # web-app-base
 
 ## Summary
-Tool to bridge Nessus vulnerability scans and ServiceNow tickets (Replacement for Lecxe)
+Base code for a web app
 
-app_name runs in a docker container, so all development can happen locally and in a perfect simulation of the real environment.
+The app runs in a docker container, so all development can happen locally and in a perfect simulation of the real environment.
 
 app_name is made up of two sections:
 - A front-end built using Vite and Vue
@@ -15,6 +15,12 @@ app_name is made up of two sections:
 All documentation for this project is written as markdown files in the [documentation](./documentation/) directory, including instructions for [setting up a local instance](./documentation/01-first-setup.md).
 
 ## Other Notes
+- Things will probably be easier if you copy all the code into your own repository and then search and replace the following terms:
+    - app_name --> Whatever you want to name your app
+    - django_apps --> (your app name)_app
+    - Web-App-Base --> Whatever you want your root project directory to be called
+    - Any directories by the names you just changed
+
 - Once you have built it, you can access the frontend docker container itself by running this command in your terminal:
     ```
     docker exec -it web-app-base-web-1 bash
