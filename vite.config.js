@@ -4,7 +4,6 @@ import vue from '@vitejs/plugin-vue';
 
 export default defineConfig(({mode}) =>{
     return {
-        base: mode === 'production' ? '/static/' : '/',
         plugins: [vue()],
         css: {
             preprocessorOptions: {
@@ -25,6 +24,11 @@ export default defineConfig(({mode}) =>{
                 }
             }
         },
+        server: {
+            proxy: {
+                '/api': 'http://127.0.0.1:8080/api'
+            }
+        }
     }    
     
 });
@@ -33,9 +37,3 @@ export default defineConfig(({mode}) =>{
 
 
 
-    // server: {
-    //     port: 8081,
-    //     proxy: {
-    //         '/static': 'http://127.0.0.1:8080/static'
-    //     }
-    // }

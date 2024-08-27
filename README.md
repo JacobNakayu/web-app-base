@@ -1,11 +1,11 @@
-# web-app-base
+# IT-SECURITY-STEESH
 
 ## Summary
-Base code for a web app
+Tool to bridge Nessus vulnerability scans and ServiceNow tickets (Replacement for Lecxe)
 
-The app runs in a docker container, so all development can happen locally and in a perfect simulation of the real environment.
+Steesh runs in a docker container, so all development can happen locally and in a perfect simulation of the real environment.
 
-app_name is made up of two sections:
+Steesh is made up of two sections:
 - A front-end built using Vite and Vue
   - Handles user experience and navigation
 - A back-end built using Django and Postgresql
@@ -15,15 +15,13 @@ app_name is made up of two sections:
 All documentation for this project is written as markdown files in the [documentation](./documentation/) directory, including instructions for [setting up a local instance](./documentation/01-first-setup.md).
 
 ## Other Notes
-- Things will probably be easier if you copy all the code into your own repository and then search and replace the following terms:
-    - app_name --> Whatever you want to name your app
-    - django_apps --> (your app name)_app
-    - Web-App-Base --> Whatever you want your root project directory to be called
-    - Any directories by the names you just changed
-
 - Once you have built it, you can access the frontend docker container itself by running this command in your terminal:
     ```
-    docker exec -it web-app-base-web-1 bash
+    docker exec -it it-security-steesh-web-1 bash
     ```
     - This will give you access to the actual file structure in the docker for debug purposes.
     - Replace "web" with "db" if you need to access the database container.
+
+- You'll have to run `npm install` in the local project directory after building for the first time before the Dev instance will work
+
+- Also if you rename any directories, be sure to search and replace for all those terms in the code

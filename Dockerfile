@@ -7,7 +7,7 @@
 FROM node:22 AS build_stage
 
 # Create and set the working directory
-WORKDIR /web-app-base
+WORKDIR /it-security-steesh
 
 # Mount the application code to the Docker image
 COPY . .
@@ -27,30 +27,28 @@ FROM nginx:latest AS nginx_stage
 RUN rm /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy all build artifacts from the build_stage so nginx can find them
-COPY --from=build_stage /web-app-base/vite_build /usr/share/nginx/html
+COPY --from=build_stage /it-security-steesh/vite_build/ /usr/share/nginx/html/
 
 # Load our custom nginx configuration files
 COPY conf /etc/nginx
 
 # Stage 3: Set up Django and Gunicorn
 FROM python:3.11
-WORKDIR /web-app-base
+WORKDIR /it-security-steesh
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Copy the entrypoint script to the container
-COPY docker-entrypoint.sh /web-app-base/docker-entrypoint.sh
+COPY docker-entrypoint.sh /it-security-steesh/docker-entrypoint.sh
 
 # Install Python dependencies
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy Django application code and build artifacts
-COPY --from=build_stage /web-app-base/django_apps /web-app-base/django_apps
-COPY --from=build_stage /web-app-base/vite_build /web-app-base/vite_build
-
+# Copy Django application code
+COPY --from=build_stage /it-security-steesh/steesh_app /it-security-steesh/steesh_app
 
 # Install Gunicorn
 RUN pip install gunicorn

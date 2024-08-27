@@ -3,9 +3,22 @@
     <header>
       <h1>Welcome to My Vue App!</h1>
     </header>
+    <p>
+      <strong>Current Rout Path:</strong> {{ $route.fullPath }}
+    </p>
+    <nav>
+      <p><RouterLink to="/home">Go to Home</RouterLink></p>
+      <p><RouterLink to="/about">Go to About</RouterLink></p>
+      <p><RouterLink to="/">Go Back</RouterLink></p>
+    </nav>
     <main>
-      <p>This is the main content area.</p>
-      <p>{{ message }}</p>
+      <div class="container">
+        <RouterView /> <!-- This is where any other Vue files will be loaded when the Router links to them. -->
+        <div class="col-4">
+          <p>This is the main content area.</p>
+          <p>{{ message }}</p>
+        </div>
+      </div>
     </main>
     <footer>
       <p>&copy; 2024 My Vue App</p>

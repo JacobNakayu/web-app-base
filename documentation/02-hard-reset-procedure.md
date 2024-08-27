@@ -1,4 +1,4 @@
-# Hard Reset of app_name
+# Hard Reset of Steesh
 
 
 ## 1. Remove Docker Containers, Volumes, and Networks
@@ -20,7 +20,7 @@ git reset --hard main
 or
 ```
 cd ..
-sudo rm -rf web-app-base
+sudo rm -rf it-security-steesh
 ```
 
 ## 3. Start Fresh

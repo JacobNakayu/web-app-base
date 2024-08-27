@@ -5,9 +5,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'vite_build'),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'vite_build'),
+# ]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Application definition for migrations
@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "owners.apps.OwnersConfig",
     "main.apps.MainConfig",
+    "steesh_api.apps.ApiConfig"
 ]
 
 # Frameworks for processing requests as they go to and from the Views
@@ -45,7 +46,7 @@ ROOT_URLCONF = "steesh.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["/web-app-base"],
+        "DIRS": ["/it-security-steesh"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

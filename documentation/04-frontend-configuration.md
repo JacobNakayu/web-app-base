@@ -1,6 +1,6 @@
 # Front-end File Configuration
 
-The front-end of app_name is mainly handled by Vite and Vue, but there is some interation with Django for the production server. This file will cover the general flow of requests and files in the Development and Production environments.
+The front-end of Steesh is mainly handled by Vite and Vue, but there is some interation with Django for the production server. This file will cover the general flow of requests and files in the Development and Production environments.
 
 ## The Development Server
 
@@ -10,7 +10,7 @@ The Vite Development Server is a fast and dynamic environment designed so you ca
 <summary> Relevant Files </summary>
 
 ````
-web-app-base/
+it-security-steesh/
 
 ├── index.html
 
@@ -54,27 +54,24 @@ The Production Server has the full application, including the frontend, backend,
 <summary> Relevant Files </summary>
 
 ````
-web-app-base/
+it-security-steesh/
 ├── index.html
 ├── package.json
 ├── vite.config.js
 └── staticfiles/
 └── conf/
-    ├── app_name-nginx.conf
+    ├── nginx.conf
 └── src/
     ├── App.vue
     ├── main.js
     └── styles/
         ├── base.scss
-└── django_apps/
+    └── router
+        ├── router.js
+└── steesh_app/
     ├── manage.py
-    └── main
-        ├── urls.py
-        └── views/
-            ├── views.py
-    └── app_name/
+    └── steesh/
         ├── settings.py
-        ├── urls.py
         ├── wsgi.py
 └── vite_build
 ````
@@ -93,24 +90,19 @@ This command is an alias for `vite build --mode production`, as set in [package.
 
 ### manage.py collectstatic
 
-2. Django takes all files from the `/vite_build` directory as well as any files in `/static` directories in the apps (as defined by the **INSTALLED_APPS** section of [settings.py](../django_apps/app_name/settings.py)) and copies them to the `/staticfiles` directory.
+2. Django takes all files from `/static` directories in the apps (as defined by the **INSTALLED_APPS** section of [settings.py](../steesh_app/steesh/settings.py)) and copies them to the `/staticfiles` directory.
     - Django automatically looks in the `/static` directory of each app
-    - It looks in `/vite_build` because that is specified in the **STATICFILES_DIRS** setting. This setting should always include the **outDir** directory from [vite.config.js](../vite.config.js)
+    - You can specify extra directories to look for static files in by using the **STATICFILES_DIRS** settings in **settings.py**. For example, if you want to have a directory with all the images and logos you use.
     - Static files are collected to the directory specified by the **STATIC_ROOT** setting in **settings.py**, which is `/staticfiles` in this case.
 
-### exec gunicorn django_apps.app_name.wsgi:application --bind 0.0.0.0:8080 --workers 3
+### exec gunicorn steesh_app.steesh.wsgi:application --bind 0.0.0.0:8080 --workers 3
 
-3. Gunicorn starts the server and web application at port `8080`
-4. When you go to http://localhost:8080/ or any variation thereof, Django checks for the URL pattern in [urls.py](../django_apps/app_name/urls.py)
-    - Django defines url patterns as anything after the port number and "/"
-    - In the case of http://localhost:8080/, the pattern it looks for is simply "" since there is nothing after the slash.
-5. If **urls.py** contains the URL pattern, it will redirect Django to the proper View in [views.py](../django_apps/main/views/views.py)
-    - In the case of URL pattern "", Django goes to the "Homepage" view
-6. The View specifies the HTML template to render for the page
-    - IN the case of the "Homepage" view, `index.html` is requested
-7. The webpage looks for an HTML file with a matching name in every directory listed in the **TEMPLATES** section of [settings.py](../django_apps/app_name/settings.py)
-8. The webpage renders the HTML and sends a request to Nginx for any Javascript or CSS files that the HTML calls for
-9. Nginx gives the webpage the static files from its static folder (which we make into a live copy of `/staticfiles` in [docker-compose.yml](../docker-compose.yml))
+3. Gunicorn starts the server and web application, binding the Django back-end to port `8080`.
+4. With the server started, Nginx begins listening on Port 80 (as specified in [nginx.conf](../conf/nginx.conf) and [docker-compose.yml](../docker-compose.yml))
+    - Nginx processes the front-end requests for Vite and Vue and sends any back-end requests to Gunicorn and WSGI for the Django application
+5. Vite serves [index.html](../index.html) as the entrypoint (as specified in [vite.config.js](../vite.config.js))
+    - **index.html** calls for [main.js](../src/main.js), which calls for [base.scss](../src/styles/base.scss) and [App.Vue](../src/App.vue) to form the baseline of the website
+6. When someone enters the website or changes the URL they are at, Nginx checks [router.js](../src/router/router.js) for a matching URL pattern and serves the appropriate Vue file.
 
 </details>
 
@@ -126,6 +118,70 @@ Vue files are essentially all the code for one part of a web page packaged into 
 - A JS section that includes all the relevant functions
 - A CSS section for specific styling that differs from the main style sheet
 
+App.vue specifically serves as the base view of the application since it is the one mounted to [index.html](../index.html) through [main.js](../src/main.js).
+- App.vue contains the navigation menu as well as a section where Views will be rendered.
+
+</details>
+<details>
+<summary>manage.py</summary>
+
+Found [here](../steesh_app/manage.py)
+
+I don't really understand how exactly this file works, but it's what lets you run commands like `collectstatic` to get the static files and `shell` to access the CLI directly.
+
+</details>
+<details>
+<summary>nginx.conf</summary>
+
+[Located here](../conf/nginx.conf)
+
+Sets up an Nginx web server to handle requests and front-end for Steesh.
+
+- Establishes there will be 1 "worker"
+- Sets each worker to handle up to 1024 connections at once
+- http block (how the server handles HTTP requests)
+    - Gives Nginx a list of file formats (MIME types) that it will need to know how to process
+    - Sets the default file type for Nginx to process a file as if it doesn't match any other MIME type
+    - Sets where access and error logs will be written
+    - Enables file transmission so Nginx can send files directly from the disk to the network
+    - Tells Nginx to wait until it has a full packet of data and then send it immediately over TCP (nopush and nodelay)
+    - Sets idle connections to close after 65 seconds
+    - Server block
+        - Tells Nginx to listen on port 80
+        - Specifies that this configuration will handle requests for the server_name or ip address given
+    - location /static/: Defines how to handle static file requests
+        - Uses an alias to map the URL path `/static/` to the local Nginx HTMl directory (like in docker-compose.yml)
+    - location /: Defines how to handle requests to the root URL and other paths
+        - Tries to seve the requested file (`$uri`) or directory (`$uri/`), defaulting to index.html if nothing is there.
+    - location /api/: Handles requests starting with `/api/` by proxying them to the Django backend
+        - Passes requests to the Django application in the Web container at port 8080
+        - Pases the original `Host` header from the client to the backend
+        - Passes the client's IP address to the backend
+        - Adds the client's IP address to the proper headers for passing through proxy services
+        - Lets the backend know if we're using HTTP or HTTPS
+</details>
+<details>
+<summary> package.json </summary>
+
+This file specifies what packages and software should be included in the frontend code.
+
+The second section, titled `scripts`, maps the commands `npm run build` and `npm run dev` to their Vite equivalents.
+
+</details>
+<details>
+<summary>router.js</summary>
+
+Found [here](../src/router/router.js)
+
+This file tells Vue how to map Vue files to URL patterns.
+
+- Imports all relevant Vue files
+- Associates URL patterns with Vue files
+- Creates the Vue-Router instance and defines its properties
+    - createWebHistory: Enables HTML5 history mode (navigation will happen without reloading the page)
+    - import.meta.env.BASE_URL: Ensures that Vue generates urls based on the base URL of the site
+    - routes: Gives the router the array of routes we defined earlier
+
 </details>
 <details>
 <summary>settings.py</summary>
@@ -133,7 +189,7 @@ Vue files are essentially all the code for one part of a web page packaged into 
 Declares all settings Django will use for the project.
 
 ### Static Files
-- Sets the Base Directory to be two directories higher than wherever settings.py is (in this case, `/web-app-base`)
+- Sets the Base Directory to be two directories higher than wherever settings.py is (in this case, `/it-security-steesh`)
 - Sets all static files to be placed at the `/static/` url in the website
 - Tells Django to look for built or static files in the `/vite_build` directory when `collectstatic` is run
 - Tells Django to collect static files in the `/staticfiles` directory
@@ -145,68 +201,11 @@ Declares all settings Django will use for the project.
 - Declares which frameworks Django should use to process requests
 
 ### Other
-- Tells Django to work with WSGI using the app set up by [wsgi.py](../django_apps/app_name/wsgi.py)
-- Tells Django that URL patterns are defined in the [urls.py](../django_apps/app_name/urls.py) file
-- Tells Django to look for HTML template files in `/web-app-base` and any directory called `/templates` within anything defined as an Installed App
+- Tells Django to work with WSGI using the app set up by [wsgi.py](../steesh_app/steesh/wsgi.py)
+- Tells Django that URL patterns are defined in the [urls.py](../steesh_app/steesh/urls.py) file
+- Tells Django to look for HTML template files in `/it-security-steesh` and any directory called `/templates` within anything defined as an Installed App
 - Sets language, time zone, etc.
 - Imports all settings from local_settings.py
-</details>
-<details>
-<summary>app_name-nginx.conf</summary>
-
-[Located here](../conf/app_name-nginx.conf)
-
-Sets up an Nginx web server to handle requests for app_name.
-
-- Server block
-    - Tells Nginx to listen on port 80
-    - Specifies that this configuration will handle requests for the server_name or ip address given
-- location /static/: Defines how to handle static file requests
-    - Uses an alias to map the URL path `/static/` to the local Nginx HTMl directory (like in docker-compose.yml)
-- location /: Defines how to handle requests to the root URL and other paths
-    - Tries to seve the requested file (`$uri`) or directory (`$uri/`), defaulting to index.html if nothing is there.
-- location /api/: Handles requests starting with `/api/` by proxying them to the Django backend
-    - Passes requests to the Django application in the Web container at port 8080
-    - Pases the original `Host` header from the client to the backend
-    - Passes the client's IP address to the backend
-    - Adds the client's IP address to the proper headers for passing through proxy services
-    - Lets the backend know if we're using HTTP or HTTPS
-</details>
-<details>
-<summary> package.json </summary>
-
-This file specifies what packages and software should be included in the frontend code.
-
-The second section, titled `scripts`, maps the commands `npm run build` and `npm run dev` to their Vite equivalents.
-
-</details>
-<details>
-<summary>urls.py</summary>
-
-Found [here](../django_apps/app_name/urls.py)
-
-This file tells Django what Views to run when an HTP or HTTP request comes in. 
-
-Since we have multiple "applications" (Main, Owners, etc.), we give each app its own `urls.py` and then import them into the main file as needed and based on a url prefix (for example, "/owners/" or "").
-
-Each URL path has three parts
-- The text pattern in the URL
-- The view to run from [views.py](../django_apps/main/views/views.py)
-- The name of the page
-
-</details>
-<details>
-<summary>views.py</summary>
-
-The most common view file is located [here](../django_apps/main/views/views.py)
-
-This file tells Django what HTML template to associate with each URL pattern (if necessary).
-
-Each View is in the format of a python function. Each function:
-- Takes a web request as an argument
-- Returns the rendered request and HTML file
-
-You can add more code to have each view do additional back-end work before rendering the page.
 </details>
 <details>
 <summary> vite.config.js </summary>

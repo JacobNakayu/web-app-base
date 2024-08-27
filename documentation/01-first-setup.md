@@ -1,4 +1,4 @@
-# Setting Up app_name
+# Setting Up Steesh
 
 1. Ensure you have [Docker Desktop](https://docs.docker.com/desktop/install/linux-install/) or [Docker Engine](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) installed on your machine
 
@@ -8,25 +8,25 @@
     ```
     
 3. Create the following files:
-    - it-secuirty-app_name/.env
+    - it-secuirty-steesh/.env
         ```
         POSTGRES_PASSWORD=Your Database Password (no quotes)
-        POSTGRES_USER=app_name_user
+        POSTGRES_USER=steesh_user
         POSTGRES_HOST=postgres-sheesh
-        POSTGRES_DB=app_name
+        POSTGRES_DB=steesh
         DB_HOST=db
         DB_PORT=5432
-        PYTHONPATH=/web-app-base
+        PYTHONPATH=/it-security-steesh
         ```
-    - web-app-base/db_init/init.sql (you'll need to create the db_init directory as well)
+    - it-security-steesh/db_init/init.sql (you'll need to create the db_init directory as well)
         ```
         -- Creates the user and database the first time the Docker is built
         
-        CREATE USER app_name_user WITH PASSWORD 'Your Database Password (in single quotes)';
-        CREATE DATABASE app_name;
-        GRANT ALL PRIVILEGES ON DATABASE app_name TO app_name_user;
+        CREATE USER steesh_user WITH PASSWORD 'Your Database Password (in single quotes)';
+        CREATE DATABASE steesh;
+        GRANT ALL PRIVILEGES ON DATABASE steesh TO steesh_user;
         ```
-    - web-app-base/django_apps/app_name/local_settings.py
+    - it-security-steesh/steesh_app/steesh/local_settings.py
         ```
         from os import getenv
         
@@ -52,8 +52,8 @@
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': getenv("POSTGRES_DB", 'app_name'),
-                'USER': getenv("POSTGRES_USER", "app_name_user"),
+                'NAME': getenv("POSTGRES_DB", 'steesh'),
+                'USER': getenv("POSTGRES_USER", "steesh_user"),
                 'PASSWORD': getenv("POSTGRES_PASSWORD", "DB Password if you want to hard code"),
                 'HOST': getenv('DB_HOST', "db"),
                 'PORT': getenv('DB_PORT', "5432"),
@@ -62,7 +62,7 @@
         ```
 4. Set a database password in .env and init.sql
 
-5. Generate a Django Secret Key using the following command and place it in django_apps/app_name/local_settings.py
+5. Generate a Django Secret Key using the following command and place it in steesh_app/steesh/local_settings.py
     ```
     python3 -c 'import secrets; print(secrets.token_hex(100))'
     ```
@@ -80,7 +80,7 @@
         - Some MAC users encounter a permissions or authentication error when trying to load Python and Node in the build process. In this case:
           - Navigate to your root directory
           - Run `sudo chmod -R 775 ~/.docker`
-          - Return to the web-app-base directory
+          - Return to the it-security-steesh directory
           - Run `docker-compose up --build` (no sudo)
     - For Ubuntu
         ```

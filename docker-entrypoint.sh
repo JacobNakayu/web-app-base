@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e  # Exit on error
 
-cd ./django_apps
+cd ./steesh_app
 
 # Collect static files
 echo "Collect static files..."
@@ -14,4 +14,4 @@ python manage.py migrate || { echo 'Failed to apply migrations'; exit 1; }
 
 # Start server
 echo "Starting Gunicorn..."
-exec gunicorn django_apps.app_name.wsgi:application --bind 0.0.0.0:8080 --workers 3
+exec gunicorn steesh_app.steesh.wsgi:application --bind 0.0.0.0:8080 --workers 3

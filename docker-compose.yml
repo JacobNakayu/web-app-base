@@ -2,21 +2,22 @@ services:
   web:
     build: .
     volumes:
-      - ./django_apps:/web-app-base/django_apps
-      - ./staticfiles:/web-app-base/staticfiles
+      - ./steesh_app:/it-security-steesh/steesh_app
+      - ./staticfiles:/it-security-steesh/staticfiles
     ports:
       - "8080:8080"
     environment:
-      - PYTHONPATH=/web-app-base
+      - PYTHONPATH=/it-security-steesh
     depends_on:
       - db
     env_file:
       - .env
 
   nginx:
-    image: nginx:latest
+    build:
+      context: .
+      target: nginx_stage
     volumes:
-      - ./conf:/etc/nginx/conf.d
       - ./staticfiles:/usr/share/nginx/html/staticfiles
     ports:
       - "80:80"
@@ -29,9 +30,9 @@ services:
     env_file:
       - .env
     volumes:
-      - db_data_app_name:/var/lib/postgresql/data
+      - db_data_steesh:/var/lib/postgresql/data
     ports:
       - 5432:5432
 
 volumes:
-  db_data_app_name:
+  db_data_steesh:
