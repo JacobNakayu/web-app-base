@@ -1,11 +1,14 @@
-# IT-SECURITY-STEESH
+# Web App Base
+
+>[!WARNING]
+>This is a pretty early iteration that I made while I was still teaching myself how to code. The project that I based this off of has developed a lot, and I haven't yet gone back and fixed some of the wonky configurations yet, so it might need some tweaking.
 
 ## Summary
-Tool to bridge Nessus vulnerability scans and ServiceNow tickets (Replacement for Lecxe)
+Basic setup for a web application. The goal is to have a ready-to-go base of file structures and config files that can be customized into a full app.
 
-Steesh runs in a docker container, so all development can happen locally and in a perfect simulation of the real environment.
+This runs in a docker container, so all development can happen locally and in a perfect simulation of the real environment.
 
-Steesh is made up of two sections:
+Made up of two sections:
 - A front-end built using Vite and Vue
   - Handles user experience and navigation
 - A back-end built using Django and Postgresql
@@ -17,7 +20,7 @@ All documentation for this project is written as markdown files in the [document
 ## Other Notes
 - Once you have built it, you can access the frontend docker container itself by running this command in your terminal:
     ```
-    docker exec -it it-security-steesh-web-1 bash
+    docker exec -it <WHATEVER-YOU-NAMED-THE-CONTAINER>-1 bash
     ```
     - This will give you access to the actual file structure in the docker for debug purposes.
     - Replace "web" with "db" if you need to access the database container.
